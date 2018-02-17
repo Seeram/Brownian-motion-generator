@@ -1,0 +1,9 @@
+set style line 1 lc rgb '#0060ad'
+set style line 2 lc rgb '#dd181f'
+set xrange [-4:4]
+set yrange [-4:4]
+set ylabel 'B_2'
+set xlabel 'B_1'
+set terminal svg size 350,262 enhanced font 'Verdana,10'
+set output 'random_variable_realization.svg' 
+plot filename index 0 ls 1 notitle

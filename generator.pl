@@ -5,22 +5,27 @@ use warnings;
 
 use Data::Dumper;
 
-my $no_random_variables = 1000;
 my @random_variable_realization;
 
 my $basic_gnuplot_file_points =
 "set style line 1 lc rgb \'#0060ad\'
 set style line 2 lc rgb \'#dd181f\'
+set xrange [-4:4]
+set yrange [-4:4]
+set ylabel \'B_2\'
+set xlabel \'B_1\'
 set terminal svg size 350,262 enhanced font \'Verdana,10\'
 set output \'random_variable_realization.svg\' 
 plot filename index 0 ls 1 notitle";
-
 my $basic_gnuplot_file_trajectories = 
 "set style line 1 lc rgb \'#0060ad\'
 set terminal svg size 350,262 enhanced font \'Verdana,10\'
 set output \'brown_movement.svg\' 
 plot \\\n";
 
+
+ # pocet nahodnych premennych pouzitich pri generovani normalneho rozdelenia
+my $no_random_variables = 1000;
 	# Lindeberg-Levy central limit theorem 
 	# Using continuous uniform distribution
 sub generate_normal_distribution 
@@ -40,7 +45,7 @@ sub generate_normal_distribution
 	return sqrt($no_random_variables)  * $mean;
 }
 
-sub test_data 
+sub test_normal_distribution 
 {
 	my ($sigma, @data) = @_;
 
@@ -170,9 +175,13 @@ sub generate_graph_random_variable_realization
 	}
 }
 
-my $no_trajectories = 1000;
+	# pocet vygenerovanych trajektorii
+my $no_trajectories = 10000;
+	# pocet casovych krokov
 my $no_time_steps = 10;
+	# dlzka trajektorii je rovnaka pre vytvorenie hodnot B1 a B2
 my $length = $no_time_steps;
+
 
 my $trajectories_filename = "trajectories";
 my $random_variable_realization_filename = "random_variable_realization";
@@ -180,8 +189,8 @@ my $random_variable_realization_filename = "random_variable_realization";
 generate_graph_brown_trajectories($no_trajectories, $no_time_steps, $length, $trajectories_filename);
 `gnuplot -e "filename='$trajectories_filename.dat'" $trajectories_filename.plg`;
 
+	# pocet realizacii nahodnych premennych moze byt 0
 if( @random_variable_realization ) {
-	print Dumper @random_variable_realization;
 	generate_graph_random_variable_realization($random_variable_realization_filename, @random_variable_realization);
 	`gnuplot -e "filename='$random_variable_realization_filename.dat'" $random_variable_realization_filename.plg`;
 }
