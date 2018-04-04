@@ -6,6 +6,8 @@ use warnings;
 use Data::Dumper;
 
 my @random_variable_realization;
+my @random_variable_realization_test;
+my $counter = 0;
 
 my $basic_gnuplot_file_points =
 "set style line 1 lc rgb \'#0060ad\'
@@ -16,7 +18,7 @@ set ylabel \'B_2\'
 set xlabel \'B_1\'
 set terminal svg size 350,262 enhanced font \'Verdana,10\'
 set output \'random_variable_realization.svg\' 
-plot filename index 0 ls 1 notitle";
+plot \\\n";
 my $basic_gnuplot_file_trajectories = 
 "set style line 1 lc rgb \'#0060ad\'
 set terminal svg size 350,262 enhanced font \'Verdana,10\'
@@ -120,10 +122,11 @@ sub generate_brown_trajectories
 sub process_trajectory
 {
 	my ($trajectory) = @_;
+	push @random_variable_realization, [ $trajectory->[1]->[1], $trajectory->[2]->[1] ];
 
 		# V case 1 je hodnota viac nez jedna a v case 2 je hodnota medzi 0 a 1;	
 	if($trajectory->[1]->[1] > 1 && $trajectory->[2]->[1] > 0 && $trajectory->[2]->[1] < 1) {
-		push @random_variable_realization, [ $trajectory->[1]->[1], $trajectory->[2]->[1] ];
+		$counter++;
 		return 0;
 	} else {
 		return 1;
@@ -169,14 +172,20 @@ sub generate_graph_random_variable_realization
 		or die "Cannot open $filename.plg";
 
 	print $gnuplot_file $basic_gnuplot_file_points;
-
-	foreach my $coordinates ( @data ) {
-		print $data_file "$coordinates->[0] $coordinates->[1]\n";
+	
+	foreach my $i ( 0..$#data ) {
+		#if($coordinates->[0] > 1 && $coordinates->[1] > 0 && $coordinates->[1] < 1) {
+		if($data[$i]->[0] > 1 && $data[$i]->[1] > 0 && $data[$i]->[1] < 1) {
+			print $gnuplot_file "filename index $i with linespoints ls 1 notitle, \\\n";
+		} else {
+			print $gnuplot_file "filename index $i with linespoints ls 2 notitle, \\\n";
+		}
+		print $data_file "$data[$i]->[0] $data[$i]->[1]\n\n\n";
 	}
 }
 
 	# pocet vygenerovanych trajektorii
-my $no_trajectories = 10000;
+my $no_trajectories = 1000;
 	# pocet casovych krokov
 my $no_time_steps = 10;
 	# dlzka trajektorii je rovnaka pre vytvorenie hodnot B1 a B2
@@ -188,6 +197,8 @@ my $random_variable_realization_filename = "random_variable_realization";
 
 generate_graph_brown_trajectories($no_trajectories, $no_time_steps, $length, $trajectories_filename);
 `gnuplot -e "filename='$trajectories_filename.dat'" $trajectories_filename.plg`;
+
+print "number of trajectories: $no_trajectories\nnumber of trajectories satisfying condition: $counter\n";
 
 	# pocet realizacii nahodnych premennych moze byt 0
 if( @random_variable_realization ) {
